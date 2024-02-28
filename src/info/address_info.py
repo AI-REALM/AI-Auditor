@@ -14,11 +14,12 @@ def get_account_info(address):
         # Get the stdout from the Node.js script and parse the JSON
         output = process.stdout
         data = json.loads(output)  # Parse the JSON output from Node.js
-        print("Data received from Node.js:", data)
+        # print("Data received from Node.js:", data)
         if "errors" in data:
             print("Errors")
+            return False
         else:
-            wallet = int(data["wallet"].split("$")[-1].strip().replace(",", ""))
+            wallet = float(data["wallet"].split("$")[-1].strip().replace(",", ""))
 
             contain_cryto = {}
             for i in data["cryptoInfo"]:
@@ -31,11 +32,15 @@ def get_account_info(address):
                             "amount" : float(i.split("$")[-1].strip().replace(",", "")),
                             "chainid" : y["metadata"]["absoluteChainId"]
                         }
-                    
-            print(wallet)
-            print(contain_cryto)
+            return_value = {
+                "address": data["address"],
+                "wallet": wallet,
+                "contain_crypto": contain_cryto
+            }
+            return return_value
             # Handle the error as needed
     else:
         print("Node.js script failed with return code:", process.returncode)
+        return False
 
-get_account_info("0x2170ed0880ac9a755fd29b2688956bd959f933f8")
+# print(get_account_info("0x2170ed0880ac9a755fd29b2688956bd959f933f8"))

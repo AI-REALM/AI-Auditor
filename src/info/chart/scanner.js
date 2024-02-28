@@ -2,8 +2,8 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 
 const address = process.argv[2]
-
 const chain_id = Number(process.argv[3])
+const type_scrap = process.argv[4]
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -629,25 +629,47 @@ const variables = {
   };
 
 (async () => {
-
+  let returnValue
+  if (type_scrap === "all") {
     const project_data = await fetchGraphQLData(project_query, variables);
-    const governanceInfo_data = await fetchGraphQLData(governanceInfo_query, variables);
-    const fakeTokenDetection_data = await fetchGraphQLData(fakeTokenDetection_query, variables);
+    // const governanceInfo_data = await fetchGraphQLData(governanceInfo_query, variables);
+    // const fakeTokenDetection_data = await fetchGraphQLData(fakeTokenDetection_query, variables);
     const liquidityAnalysis_data = await fetchGraphQLData(liquidityAnalysis_query, variables);
     const holderAnalysis_data = await fetchGraphQLData(holderAnalysis_query, variables);
-    const socialAnalysis_data = await fetchGraphQLData(socialAnalysis_query, variables);
+    // const socialAnalysis_data = await fetchGraphQLData(socialAnalysis_query, variables);
     const score_data = await fetchGraphQLData(score_query, variables);
 
-    let returnValue = {
-        project: project_data.data.project,
-        governanceInfo: governanceInfo_data.data.governanceInfo,
-        fakeTokenDetection: fakeTokenDetection_data.data.fakeTokenDetection,
-        liquidityAnalysis:liquidityAnalysis_data.data.liquidityAnalysis,
-        holderAnalysis: holderAnalysis_data.data.holderAnalysis,
-        socialAnalysis: socialAnalysis_data.data.socialAnalysis,
-        score: score_data.data.score
+    returnValue = {
+      project: project_data.data.project,
+      liquidityAnalysis:liquidityAnalysis_data.data.liquidityAnalysis,
+      holderAnalysis: holderAnalysis_data.data.holderAnalysis,
+      score: score_data.data.score
     };
-    console.log(JSON.stringify(returnValue)); // Convert the object to a JSON string and print it
-    process.exit(0);
+  } else {
+    if (type_scrap === "liquidity") {
+      const liquidityAnalysis_data = await fetchGraphQLData(liquidityAnalysis_query, variables);
+      returnValue = {
+        liquidityAnalysis:liquidityAnalysis_data.data.liquidityAnalysis
+      };
+    } else {
+      if (type_scrap === "holders") {
+        const holderAnalysis_data = await fetchGraphQLData(holderAnalysis_query, variables);
+        returnValue = {
+          holderAnalysis: holderAnalysis_data.data.holderAnalysis
+        };
+      } else {
+        const project_data = await fetchGraphQLData(project_query, variables);
+        const liquidityAnalysis_data = await fetchGraphQLData(liquidityAnalysis_query, variables);
+        const holderAnalysis_data = await fetchGraphQLData(holderAnalysis_query, variables);
+        returnValue = {
+          project: project_data.data.project,
+          liquidityAnalysis:liquidityAnalysis_data.data.liquidityAnalysis,
+          holderAnalysis: holderAnalysis_data.data.holderAnalysis
+        };
+      }
+    }
+  }
 
+  console.log(JSON.stringify(returnValue)); // Convert the object to a JSON string and print it
+  process.exit(0);
 })();

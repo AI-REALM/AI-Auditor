@@ -19,6 +19,9 @@ function sleep(ms) {
     { waitUntil: 'networkidle0' }
   );
   try {
+    let address 
+    await page.waitForSelector('div.css-70qvj9 span', {timeout: 1000})
+    address = await page.$$eval('div.css-70qvj9 span', (el) => el[0].getAttribute('aria-label'));
     let wallet = []
     await page.waitForSelector('div.five.wide.computer.sixteen.wide.mobile.sixteen.wide.tablet.column.jss154', {timeout: 1000})
     wallet = await page.$eval('div.five.wide.computer.sixteen.wide.mobile.sixteen.wide.tablet.column.jss154', (el) => el.textContent);
@@ -42,6 +45,7 @@ function sleep(ms) {
     // console.log(chain_info)
 
     let returnValue = {
+        address: address,
         wallet: wallet,
         cryptoInfo: crypto_info,
         chainInfo: chain_info
