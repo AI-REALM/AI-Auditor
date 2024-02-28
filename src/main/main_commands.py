@@ -448,6 +448,7 @@ async def code_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     
     await message.reply_text(f'Pleaes input your code.', parse_mode=ParseMode.MARKDOWN)
 
+# general chat handler function
 async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.message or update.callback_query.message
     text = update.message.text or update.callback_query.data

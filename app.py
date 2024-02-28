@@ -16,8 +16,9 @@ API_URL = f"https://api.telegram.org/bot{TOKEN}/setMyCommands"
 
 commands = [
     {"command": "start", "description": "Displays help text"},
-    {"command": "address", "description": "Displays information about an account based on the given address."},
+    {"command": "wallet", "description": "Displays information about an wallet based on the given address."},
     {"command": "audit", "description": "Perform AI analysis on the given contract address."},
+    {"command": "code", "description": "Perform AI analysis on the given contract code."},
     {"command": "stats", "description": "Displays the bot stats"}
 ]
 

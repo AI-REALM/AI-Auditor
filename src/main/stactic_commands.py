@@ -20,5 +20,6 @@ async def bot_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Welcome aboard!\n"
         "Introducing Telegram's AI Auditor Bot.\n\n"
         "👜 Explore information about any account you desire!\n\n"
-        "🔬 Generates AI analysis about any contract address.\n\n", reply_markup=reply_markup
+        "🔬 Generates AI analysis about any contract address.\n\n"
+        "🔭 Generates AI analysis about user's code.\n\n", reply_markup=reply_markup
     )
