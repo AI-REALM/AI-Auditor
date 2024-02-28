@@ -50,7 +50,7 @@ async def wallet_final_response(message: Update.message, context: ContextTypes.D
             similarity = 1
         
         if similarity > 0.8:
-            if similarity == 1:
+            if similarity != 1:
                 await message.edit_text(
                     f'⚠ The address `{user_input}` is not valid. Do you mean `{wallet_info["address"]}`.',
                     parse_mode=ParseMode.MARKDOWN
@@ -212,7 +212,7 @@ async def auditor_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             similarity = 1
         
         if similarity > 0.8:
-            if similarity == 1:
+            if similarity != 1:
                 await sent_message.edit_text(
                     f'⚠ The address `{user_input}` is not valid. Do you mean `{wallet_info["address"]}`.',
                     parse_mode=ParseMode.MARKDOWN
@@ -488,8 +488,9 @@ async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
         sent_message = await message.reply_text(f'Analysing the your code', parse_mode=ParseMode.MARKDOWN)
         code_audit = code_auditor(usercode=text)
         await sent_message.delete()
-        await context.bot.send_message(
-            text= code_audit, 
-            chat_id=message.chat_id,
-            parse_mode=ParseMode.HTML
-        )
+        for i in code_audit:
+            await context.bot.send_message(
+                text= i, 
+                chat_id=message.chat_id,
+                parse_mode=ParseMode.HTML
+            )
