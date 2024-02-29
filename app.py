@@ -32,6 +32,9 @@ def main() -> None:
     start_handler = CommandHandler('start', bot_start)
     application.add_handler(start_handler)
 
+    stats_handler = CommandHandler('stats', stats)
+    application.add_handler(stats_handler)
+
     # Add the /stats command handler to the application
     wallet_handler = CommandHandler('wallet', wallet_handle)
     application.add_handler(wallet_handler)

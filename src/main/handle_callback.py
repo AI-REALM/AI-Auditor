@@ -16,17 +16,17 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
     # If the "Close settings" button is pressed, delete the message
 
     elif query.data.startswith('issues_'):
-        # Call settings function directly when "Settings" button is pressed
+        # Call settings function directly when "issues" button is pressed
         await issues_callback_handle(update, context)
     
     elif query.data.startswith('liquidity_'):
-        # Call settings function directly when "Settings" button is pressed
+        # Call settings function directly when "liquidity" button is pressed
         await liquidity_callback_handle(update, context)
     
     elif query.data.startswith('holder_'):
-        # Call settings function directly when "Settings" button is pressed
+        # Call settings function directly when "holder" button is pressed
         await holder_callback_handle(update, context)
     
     elif query.data.startswith('audit_'):
-        # Call settings function directly when "Settings" button is pressed
+        # Call settings function directly when "audit" button is pressed
         await auditor_callback_handle(update, context)

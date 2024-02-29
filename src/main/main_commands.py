@@ -1,15 +1,19 @@
 # Import required classes from the library
-import json, asyncio
+import asyncio, os
 from telegram.ext import ContextTypes
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from datetime import datetime, timedelta
 from telegram.constants import ParseMode
 from ..model.crud import get_user_by_id, create_user, update_moethod
 from ..info.address_info import get_account_info
 from ..info.scanner import get_scanner_general_result, get_scanner_issues_result, get_scanner_liquidity_result, get_scanner_holders_result
 from ..info.code_auditor import code_auditor
-from tabulate import tabulate
+from .admin_commands import admin_notify, log_function
+from dotenv import load_dotenv
+load_dotenv(dotenv_path='.env')
 
+admin = int(os.getenv('ADMIN'))
+
+# Convert numbers in standard numeric display format
 def format_number(num):
     suffixes = ['T', 'B', 'M', 'K']
     
@@ -20,6 +24,7 @@ def format_number(num):
     rounded_number = round(num, 3)
     return rounded_number
 
+# Measures the similarity between two strings
 def levenshtein_distance(s, t):
     m, n = len(s), len(t)
     if m < n:
@@ -42,8 +47,10 @@ def compute_similarity(input_string, reference_string):
 
 # wallet info response generate function
 async def wallet_final_response(message: Update.message, context: ContextTypes.DEFAULT_TYPE, user_input:str):
+    # Searching the wallet with the address
     wallet_info = get_account_info(address=user_input)
     if wallet_info:
+        # Check if the result is correct
         if user_input.lower() != wallet_info["address"].lower():
             similarity = compute_similarity(user_input.lower(), wallet_info["address"].lower())
         else:
@@ -72,28 +79,36 @@ async def wallet_final_response(message: Update.message, context: ContextTypes.D
                 chat_id=message.chat_id, 
                 parse_mode=ParseMode.HTML
             )
+            # Add to log
+            log_function(chat_id=message.chat_id, request_type="wallet", user_input=user_input, result="Successful")
         else:
+            # Add to log
+            log_function(chat_id=message.chat_id, request_type="wallet", user_input=user_input, result="Failed")
             await message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to a wallet by our search algorithm. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
             await asyncio.sleep(5)
             await message.delete()
     else:
-            await message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to a wallet by our search algorithm. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
-            await asyncio.sleep(5)
-            await message.delete()
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="wallet", user_input=user_input, result="Failed")
+        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Wallet: wallet scraping failed")
+        await message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to a wallet by our search algorithm. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
+        await asyncio.sleep(5)
+        await message.delete()
 
 # /wallet handling functions
 async def wallet_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # Define the response message and buttons
     message = update.message or update.callback_query.message
-    
     text = update.message.text or update.callback_query.data
+
     chat_id = message.chat_id
     user = get_user_by_id(chat_id)
+    # Check current user default method and update the method
     if not user:
         create_user(chat_id)
     if user.method != "wallet":
         update_moethod(user.id, "wallet")
 
+    # extract address from user input
     if text.strip() == "/wallet":
         i_text = (
             "💡 The `/wallet` command requires a ticker. For example: `/wallet 0x2170ed0880ac9a755fd29b2688956bd959f933f8`. "
@@ -119,6 +134,7 @@ async def wallet_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 # audit final response generate function
 async def auditor_final_response(message: Update.message, context: ContextTypes.DEFAULT_TYPE, address:str, chain_id:int):
+    # Analysing the contract with address and chainid
     analysis_data = get_scanner_general_result(address=address, chain_id=chain_id)
     if analysis_data:
         keyboard = []
@@ -168,19 +184,25 @@ async def auditor_final_response(message: Update.message, context: ContextTypes.
             reply_markup=reply_markup,
             parse_mode=ParseMode.HTML
         )
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=address, result="Successful")
     else:
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=address, result="Failed")
+        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=address, result_code="Audit: token audit failed")
         await message.edit_text(f'❌ This address `{address}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await message.delete()
 
 # /auditor handling functions
 async def auditor_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # Define the response message and buttons
     message = update.message or update.callback_query.message
     text = update.message.text or update.callback_query.data
 
     chat_id = message.chat_id
     user = get_user_by_id(chat_id)
+
+    # Check the current user default method and update the method
     if not user:
         create_user(chat_id)
     if user.method != "audit":
@@ -203,9 +225,11 @@ async def auditor_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     sent_message = await message.reply_text(f'Analysing details of the contract of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
 
+    # Find the chain id with contract address
     wallet_info = get_account_info(address=user_input)
     if wallet_info:
         main_network = list(wallet_info["contain_crypto"].keys())[0]
+        # Check if the chain id is correct
         if user_input.lower() != wallet_info["address"].lower():
             similarity = compute_similarity(user_input.lower(), wallet_info["address"].lower())
         else:
@@ -220,17 +244,21 @@ async def auditor_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await auditor_final_response(message=sent_message, context=context, address=wallet_info["address"], chain_id=wallet_info["contain_crypto"][main_network]["chainid"])
 
         else:
+            # Add to log
+            log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
             await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
             await asyncio.sleep(5)
             await sent_message.delete()
     else:
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
+        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Wallet: wallet scraping failed")
         await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()
 
 # /issues callback handling functions
 async def issues_callback_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # Define the response message and buttons
     message = update.callback_query.message
     text = update.callback_query.data
     
@@ -245,6 +273,7 @@ async def issues_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
     # await message.delete()
     sent_message = await message.edit_text(f'Advanced analysing of issues of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
     
+    # Advanced analysis of issues in contract analysis with address and chain id
     analysis_data = get_scanner_issues_result(address=user_input, chain_id=chain_id)
     if analysis_data:
         keyboard = [
@@ -280,14 +309,19 @@ async def issues_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
             reply_markup=reply_markup,
             parse_mode=ParseMode.HTML
         )
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Successful")
     else:
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
+        # Notify bot administrator
+        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Audit: Advanced analysis about Issues failed")
         await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()  
 
 # /liquidity callback handling functions
 async def liquidity_callback_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # Define the response message and buttons
     message = update.callback_query.message
     text = update.callback_query.data
     
@@ -301,7 +335,7 @@ async def liquidity_callback_handle(update: Update, context: ContextTypes.DEFAUL
 
     # await message.delete()
     sent_message = await message.edit_text(f'Advanced analysis of the liquidity of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
-    
+    # Advanced analysis of liquidity information of contracts, by address and chain ID
     analysis_data = get_scanner_liquidity_result(address=user_input, chain_id=chain_id)
     if analysis_data:
         keyboard = [
@@ -347,14 +381,19 @@ async def liquidity_callback_handle(update: Update, context: ContextTypes.DEFAUL
             reply_markup=reply_markup,
             parse_mode=ParseMode.HTML
         )
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Successful")
     else:
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
+        # Notify bot admin
+        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Audit: Advanced analysis about Liquidity failed")
         await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.', parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()  
 
 # /holder callback handling functions
 async def holder_callback_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # Define the response message and buttons
     message = update.callback_query.message
     text = update.callback_query.data
     
@@ -368,7 +407,7 @@ async def holder_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
 
     # await message.delete()
     sent_message = await message.edit_text(f'Advanced analysis of the holders of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
-    
+    # Advanced analysis of holders information of contracts, by address and chain ID
     analysis_data = get_scanner_holders_result(address=user_input, chain_id=chain_id)
     if analysis_data:
         keyboard = [
@@ -409,14 +448,19 @@ async def holder_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
             reply_markup=reply_markup,
             parse_mode=ParseMode.HTML
         )
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Scuccessful")
     else:
+        # Add to log
+        log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
+        # Notify bot admin
+        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Audit: Advanced analysis about Holders failed")
         await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()  
 
 # /auditor callback handling functions
 async def auditor_callback_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # Define the response message and buttons
     message = update.callback_query.message
     text = update.callback_query.data
     
@@ -480,10 +524,13 @@ async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
                 await auditor_final_response(message=sent_message, context=context, address=wallet_info["address"], chain_id=wallet_info["contain_crypto"][main_network]["chainid"])
 
             else:
+                log_function(chat_id=message.chat_id, request_type="audit", user_input=text, result="Failed")
                 await sent_message.edit_text(f'❌ This address `{text}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
                 await asyncio.sleep(5)
                 await sent_message.delete()
         else:
+            log_function(chat_id=message.chat_id, request_type="audit", user_input=text, result="Failed")
+            await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=text, result_code="Wallet: wallet scraping failed")
             await sent_message.edit_text(f'❌ This address `{text}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
             await asyncio.sleep(5)
             await sent_message.delete()
@@ -498,7 +545,10 @@ async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
                     chat_id=message.chat_id,
                     parse_mode=ParseMode.HTML
                 )
+            log_function(chat_id=message.chat_id, request_type="code", user_input="Code Auditor", result="Successful")
         else:
+            log_function(chat_id=message.chat_id, request_type="code", user_input="Code Auditor", result="Failed")
+            await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=text, result_code="Error in code Auditor request")
             await sent_message.edit_text(f'❌ You code is invaild code. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
             await asyncio.sleep(5)
             await sent_message.delete()

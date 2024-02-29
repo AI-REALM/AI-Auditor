@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime
 from telegram.constants import ParseMode
-from ..model.crud import get_user_by_id, create_user
+from ..model.crud import get_user_by_id, create_user, count_groups, count_individual_user
 
 # Define the start command callback function
 async def bot_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -23,3 +23,21 @@ async def bot_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "🔬 Generates AI analysis about any contract address.\n\n"
         "🔭 Generates AI analysis about user's code.\n\n", reply_markup=reply_markup
     )
+
+# Define the stats command callback function
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # Get today's date in the format YYYY-MM-DD
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    user_count = count_individual_user()
+    group_count = count_groups()
+
+    with open("log.txt", 'r', encoding='utf-8') as f:
+        imporession_count = len(f.readlines())
+        f.close()
+    # Define the stats message with the current date
+    stats_message = (f'📊 *AIRM Auditor Bot stats for {today_date}:*\n\n'
+                     f'💬 Groups using AIRM Auditor Bot: *{group_count}*\n'
+                     f'👤 Unique users: *{user_count}*\n'
+                     f'👁️ User impressions: *{imporession_count}*')
+    # Send the stats message
+    await update.message.reply_text(stats_message, parse_mode=ParseMode.MARKDOWN)

@@ -24,6 +24,7 @@ def update_chain(id:int, chain:str):
         return False
     return user
 
+# Define the default method updating function
 def update_moethod(id:int, method:str):
     user = db.query(User).filter(User.id == id).update({"method" : method})
     try:
@@ -32,6 +33,7 @@ def update_moethod(id:int, method:str):
         return False
     return user
 
+# Define function to get user with id 
 def get_user_by_id(id:int):
     user = db.query(User).filter(User.id == id).first()
     if not user:
@@ -46,8 +48,12 @@ def delete_user(id:int):
     except:
         return False
 
-def count_user():
-    user = db.query(User).count()
-    if not user:
-        return False
-    return user
+ # Define count individual for groups
+def count_individual_user():
+    user_count = db.query(User).filter(User.id > 0).count()
+    return user_count if user_count >= 0 else False
+
+# Define count function for groups
+def count_groups():
+    user_group = db.query(User).filter(User.id < 0).count()
+    return user_group if user_group >= 0 else False
