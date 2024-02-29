@@ -214,7 +214,7 @@ async def auditor_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         if similarity > 0.8:
             if similarity != 1:
                 await sent_message.edit_text(
-                    f'⚠ The address `{user_input}` is not valid. Do you mean `{wallet_info["address"]}`.',
+                    f'⚠ The address `{user_input}` is not valid. Do you mean `{wallet_info["address"]}`?',
                     parse_mode=ParseMode.MARKDOWN
                 )
             await auditor_final_response(message=sent_message, context=context, address=wallet_info["address"], chain_id=wallet_info["contain_crypto"][main_network]["chainid"])
@@ -242,8 +242,8 @@ async def issues_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
     if not user:
         create_user(chat_id)
 
-    await message.delete()
-    sent_message = await message.reply_text(f'Advanced analysing of issues of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
+    # await message.delete()
+    sent_message = await message.edit_text(f'Advanced analysing of issues of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
     
     analysis_data = get_scanner_issues_result(address=user_input, chain_id=chain_id)
     if analysis_data:
@@ -299,8 +299,8 @@ async def liquidity_callback_handle(update: Update, context: ContextTypes.DEFAUL
     if not user:
         create_user(chat_id)
 
-    await message.delete()
-    sent_message = await message.reply_text(f'Advanced analysis of the liquidity of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
+    # await message.delete()
+    sent_message = await message.edit_text(f'Advanced analysis of the liquidity of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
     
     analysis_data = get_scanner_liquidity_result(address=user_input, chain_id=chain_id)
     if analysis_data:
@@ -366,8 +366,8 @@ async def holder_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
     if not user:
         create_user(chat_id)
 
-    await message.delete()
-    sent_message = await message.reply_text(f'Advanced analysis of the holders of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
+    # await message.delete()
+    sent_message = await message.edit_text(f'Advanced analysis of the holders of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
     
     analysis_data = get_scanner_holders_result(address=user_input, chain_id=chain_id)
     if analysis_data:
@@ -428,8 +428,8 @@ async def auditor_callback_handle(update: Update, context: ContextTypes.DEFAULT_
     if not user:
         create_user(chat_id)
 
-    await message.delete()
-    sent_message = await message.reply_text(f'Analysing details of the contract of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
+    # await message.delete()
+    sent_message = await message.edit_text(f'Analysing details of the contract of `{user_input}`', parse_mode=ParseMode.MARKDOWN)
 
     await auditor_final_response(message=sent_message, context=context, address=user_input, chain_id=chain_id)
 
@@ -452,7 +452,9 @@ async def code_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.message or update.callback_query.message
     text = update.message.text or update.callback_query.data
-
+    if "@AIRMAuditorBOT" in text:
+        text = text.replace("@AIRMAuditorBOT", "").strip()
+    
     chat_id = message.chat_id
     user = get_user_by_id(chat_id)
     if user.method == "wallet":
@@ -470,7 +472,7 @@ async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
                 similarity = 1
             
             if similarity > 0.8:
-                if similarity == 1:
+                if similarity != 1:
                     await sent_message.edit_text(
                         f'⚠ The address `{text}` is not valid. Do you mean `{wallet_info["address"]}`.',
                         parse_mode=ParseMode.MARKDOWN
@@ -488,10 +490,15 @@ async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif user.method == "code":
         sent_message = await message.reply_text(f'Analysing the your code', parse_mode=ParseMode.MARKDOWN)
         code_audit = code_auditor(usercode=text)
-        await sent_message.delete()
-        for i in code_audit:
-            await context.bot.send_message(
-                text= i, 
-                chat_id=message.chat_id,
-                parse_mode=ParseMode.HTML
-            )
+        if code_audit:
+            await sent_message.delete()
+            for i in code_audit:
+                await context.bot.send_message(
+                    text= i, 
+                    chat_id=message.chat_id,
+                    parse_mode=ParseMode.HTML
+                )
+        else:
+            await sent_message.edit_text(f'❌ You code is invaild code. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
+            await asyncio.sleep(5)
+            await sent_message.delete()

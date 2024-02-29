@@ -13,7 +13,7 @@ async def bot_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not get_user_by_id(chat_id):
         create_user(chat_id)
     keyboard = [[
-        InlineKeyboardButton("➕ Add me to your group", url="https://t.me/AIRMCHARTBOT?startgroup=true"),
+        InlineKeyboardButton("➕ Add me to your group", url="https://t.me/AIRMAuditorBOT?startgroup=true"),
     ]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
