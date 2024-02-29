@@ -96,14 +96,14 @@ async def wallet_final_response(message: Update.message, context: ContextTypes.D
         else:
             # Add to log
             log_function(chat_id=message.chat_id, request_type="wallet", user_input=user_input, result="Failed")
-            await message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to a wallet by our search algorithm. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
+            await message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to a wallet by our search algorithm.\nMaybe this address is not a wallet. I see this could be a contract address. Please enter as `/audit`.\nP.S. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
             await asyncio.sleep(5)
             await message.delete()
     else:
         # Add to log
         log_function(chat_id=message.chat_id, request_type="wallet", user_input=user_input, result="Failed")
         await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Wallet: wallet scraping failed")
-        await message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to a wallet by our search algorithm. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
+        await message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to a wallet by our search algorithm.\nMaybe this address is not a wallet. I see this could be a contract address. Please enter as `/audit`.\nP.S. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await message.delete()
 
@@ -207,7 +207,7 @@ async def auditor_final_response(message: Update.message, context: ContextTypes.
         # Add to log
         log_function(chat_id=message.chat_id, request_type="audit", user_input=address, result="Failed")
         await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=address, result_code="Audit: token audit failed")
-        await message.edit_text(f'❌ This address `{address}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
+        await message.edit_text(f'❌ This address `{address}` you entered is either not available or could not be matched to any contract by our search algorithm.\nMaybe this address is not a contract. I see this could be a wallet address. Please enter as `/wallet`.\nP.S. If you know more details, please contact me directly @fieryfox617',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await message.delete()
 
@@ -264,8 +264,8 @@ async def auditor_handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     else:
         # Add to log
         log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
-        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Wallet: wallet scraping failed")
-        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
+        await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Audit: token audit failed")
+        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm.\nMaybe this address is not a contract. I see this could be a wallet address. Please enter as `/wallet`.\nP.S. If you know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()
 
@@ -332,7 +332,7 @@ async def issues_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
         log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
         # Notify bot administrator
         await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Audit: Advanced analysis about Issues failed")
-        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
+        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm.\nMaybe this address is not a contract. I see this could be a wallet address. Please enter as `/wallet`.\nP.S. If you know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()  
 
@@ -404,7 +404,7 @@ async def liquidity_callback_handle(update: Update, context: ContextTypes.DEFAUL
         log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
         # Notify bot admin
         await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Audit: Advanced analysis about Liquidity failed")
-        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.', parse_mode=ParseMode.MARKDOWN)
+        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm.\nMaybe this address is not a contract. I see this could be a wallet address. Please enter as `/wallet`.\nP.S. If you know more details, please contact me directly @fieryfox617.', parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()  
 
@@ -471,7 +471,7 @@ async def holder_callback_handle(update: Update, context: ContextTypes.DEFAULT_T
         log_function(chat_id=message.chat_id, request_type="audit", user_input=user_input, result="Failed")
         # Notify bot admin
         await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=user_input, result_code="Audit: Advanced analysis about Holders failed")
-        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
+        await sent_message.edit_text(f'❌ This address `{user_input}` you entered is either not available or could not be matched to any contract by our search algorithm.\nMaybe this address is not a contract. I see this could be a wallet address. Please enter as `/wallet`.\nP.S. If you know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
         await asyncio.sleep(5)
         await sent_message.delete()  
 
@@ -546,8 +546,8 @@ async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
                 )
         else:
             log_function(chat_id=message.chat_id, request_type="audit", user_input=text, result="Failed")
-            await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=text, result_code="Wallet: wallet scraping failed")
-            await sent_message.edit_text(f'❌ This address `{text}` you entered is either not available or could not be matched to any contract by our search algorithm. If you want to know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
+            await admin_notify(context=context, admin_chat_id=admin, user_chat_id=message.chat_id, user_input=text, result_code="Audit: token audit failed")
+            await sent_message.edit_text(f'❌ This address `{text}` you entered is either not available or could not be matched to any contract by our search algorithm.\nMaybe this address is not a contract. I see this could be a wallet address. Please enter as `/wallet`.\nP.S. If you know more details, please contact me directly @fieryfox617.',parse_mode=ParseMode.MARKDOWN)
             await asyncio.sleep(5)
             await sent_message.delete()
     elif user.method == "code":
