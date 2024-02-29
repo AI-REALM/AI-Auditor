@@ -24,7 +24,7 @@ function sleep(ms) {
     address = await page.$$eval('div.css-70qvj9 span', (el) => el[0].getAttribute('aria-label'));
     let wallet = []
     await page.waitForSelector('div.five.wide.computer.sixteen.wide.mobile.sixteen.wide.tablet.column.jss154', {timeout: 1000})
-    wallet = await page.$eval('div.five.wide.computer.sixteen.wide.mobile.sixteen.wide.tablet.column.jss154', (el) => el.textContent);
+    wallet = await page.$$eval('div.five.wide.computer.sixteen.wide.mobile.sixteen.wide.tablet.column.jss154', (el) => el.map((e) => e.textContent));
     // console.log(wallet)
     let crypto_info = []
     await page.waitForSelector('div.four.wide.computer.sixteen.wide.mobile.sixteen.wide.tablet.column.jss154', {timeout: 1000})

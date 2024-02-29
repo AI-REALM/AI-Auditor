@@ -19,7 +19,14 @@ def get_account_info(address):
             print("Errors")
             return False
         else:
-            wallet = float(data["wallet"].split("$")[-1].strip().replace(",", ""))
+            wallet_info = {}
+            for i in data["wallet"]:
+                wallet_info[i.split("$")[0]] = float(i.split("$")[-1].strip().replace(",", ""))
+            
+            contain_general_info = {}
+            
+            for i in data["cryptoInfo"]:
+                contain_general_info[i.split("$")[0]] = float(i.split("$")[-1].strip().replace(",", ""))
 
             contain_cryto = {}
             for i in data["cryptoInfo"]:
@@ -34,7 +41,8 @@ def get_account_info(address):
                         }
             return_value = {
                 "address": data["address"],
-                "wallet": wallet,
+                "wallet": wallet_info,
+                "general_info": contain_general_info,
                 "contain_crypto": contain_cryto
             }
             return return_value

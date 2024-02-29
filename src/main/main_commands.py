@@ -62,19 +62,21 @@ async def wallet_final_response(message: Update.message, context: ContextTypes.D
                     f'⚠ The address `{user_input}` is not valid. Do you mean `{wallet_info["address"]}`.',
                     parse_mode=ParseMode.MARKDOWN
                 )
+            
+            total = sum(wallet_info["wallet"].values())
             table = [(wallet_info["contain_crypto"][i]["name"], wallet_info["contain_crypto"][i]["amount"]) for i in wallet_info["contain_crypto"]]
             reply_text = f'This wallet has the following networks:\n<pre>'
             first_col_width = 15 if max(len(key) for key in [i[0] for i  in table]) < 12 else max(len(key) for key in [i[0] for i  in table]) + 3
             second_col_width = 15 if len(f"$ {"{:,}".format(table[0][1])}") < 12 else len(f"$ {"{:,}".format(table[0][1])}") + 3
             for i in table:
                 formatted_amount = f"$ {"{:,}".format(i[1])}"  # Formatting as float with 2 decimal places
-                percent = f'{"{:,.2f}".format((i[1]/wallet_info["wallet"])*100)}%'
+                percent = f'{"{:,.2f}".format((i[1]/total)*100)}%'
                 reply_text = reply_text +f"{i[0]:<{first_col_width}}{formatted_amount:<{second_col_width}}{percent}\n"
             reply_text = reply_text +"</pre>"
             await message.delete()
             await context.bot.send_message(
                 text= f'Wallet Address: <code>{wallet_info["address"]}</code>\n\n'
-                f'💰 Total Amount: $ {"{:,}".format(wallet_info["wallet"])}\n\n'
+                f'💰 Total Amount: $ {"{:,}".format(total)}\n\n'
                 f'{reply_text}', 
                 chat_id=message.chat_id, 
                 parse_mode=ParseMode.HTML
