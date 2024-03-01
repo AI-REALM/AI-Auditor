@@ -177,7 +177,7 @@ async def auditor_final_response(message: Update.message, context: ContextTypes.
             creator = ""
         liquidity_text = ""
         if analysis_data["liquidity"]:
-            liquidity_text = f'💧The current liquidity is $ {"{:,.3f}".format(analysis_data["liquidity"])}.\n\n'
+            liquidity_text = f'💧The current single flow liquidity is $ {"{:,.3f}".format(analysis_data["liquidity"])}.\n\n'
             keyboard.append(InlineKeyboardButton(text="💧 Liquidity", callback_data=f'liquidity_{address}_{chain_id}'))
         supply_text = ""
         if analysis_data["supply"]:
@@ -361,7 +361,7 @@ async def liquidity_callback_handle(update: Update, context: ContextTypes.DEFAUL
 
         reply_text =  f"Advanced liqudity analysis of <code>{user_input}</code>\n\n"
 
-        reply_text += f'🌊 Total Liquidity: $ {"{:,.2f}".format(float(analysis_data["totalLiquidity"]))}\n\n'
+        reply_text += f'🌊 single Flow Liquidity: $ {"{:,.2f}".format(float(analysis_data["totalLiquidity"]))}\n\n'
 
         reply_text += f'🔐 Lock / 🔓 Unlock: {"{:,.2f}".format(analysis_data["totalLockedPercent"])}% / {"{:,.2f}".format(analysis_data["totalUnlockedPercent"])} %\n\n'
 
