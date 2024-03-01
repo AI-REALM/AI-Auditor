@@ -16,6 +16,7 @@ API_URL = f"https://api.telegram.org/bot{TOKEN}/setMyCommands"
 
 commands = [
     {"command": "start", "description": "Displays help text"},
+    {"command": "help", "description": "How to use the bot"},
     {"command": "wallet", "description": "Displays information about an wallet based on the given address."},
     {"command": "audit", "description": "Perform AI analysis on the given contract address."},
     {"command": "code", "description": "Perform AI analysis on the given contract code."},
@@ -34,6 +35,9 @@ def main() -> None:
 
     stats_handler = CommandHandler('stats', stats)
     application.add_handler(stats_handler)
+
+    help_handler = CommandHandler('help', help)
+    application.add_handler(help_handler)
 
     # Add the /stats command handler to the application
     wallet_handler = CommandHandler('wallet', wallet_handle)

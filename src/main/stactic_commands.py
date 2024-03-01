@@ -41,3 +41,27 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                      f'👁️ User impressions: *{imporession_count}*')
     # Send the stats message
     await update.message.reply_text(stats_message, parse_mode=ParseMode.MARKDOWN)
+
+# Define the help command callback function
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    help_text = (
+        "🦾 How to use the bot\n\n"
+        
+        "👜 wallet command\n"
+        "The `/wallet` command searches for a wallet with a given address and displays the wallet status.\n\n"
+        
+        "🔬 aduit command\n"
+        "The `/aduit` command is for token auditors. This command will search contract address with user's given address and analyze contract and display detailed information of contract.\n\n"
+        
+        "🔭 code\n"
+        "The `/code` command is for code auditors. This command analyzes the user's code and reports the problems and potential risks of the code.\n\n"
+        
+        "🍀 P.S. Using bot in group\n"
+        "In group, many people chat with each other. So to use bot in group, you need to do the following:\n"
+        "1. Use commands\n"
+        "Please enter address with commands, e.g. `/wallet 0xaf6f2...`\n"
+
+        "2. Enter Bot Name\n"
+        "Please enter the bot name first, followed by your address or code. e.g. `@AIRMAuditorBOT 0xaf6f25B9...`\n"
+    )
+    await update.message.reply_text(help_text, parse_mode=ParseMode.MARKDOWN)

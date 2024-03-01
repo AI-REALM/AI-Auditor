@@ -7,8 +7,8 @@ from .main_commands import *
 async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
 
-    # Make sure to answer the callback query to give feedback to the user
-    await query.answer()
+    # # Make sure to answer the callback query to give feedback to the user
+    # await query.answer()
 
     # Below is a placeholder for how you could handle the 'close_heatmap' button press
     if query.data == 'close':
