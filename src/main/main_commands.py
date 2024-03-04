@@ -361,7 +361,7 @@ async def liquidity_callback_handle(update: Update, context: ContextTypes.DEFAUL
 
         reply_text =  f"Advanced liqudity analysis of <code>{user_input}</code>\n\n"
 
-        reply_text += f'🌊 single Flow Liquidity: $ {"{:,.2f}".format(float(analysis_data["totalLiquidity"]))}\n\n'
+        reply_text += f'🌊 Single Flow Liquidity: $ {"{:,.2f}".format(float(analysis_data["totalLiquidity"]))}\n\n'
 
         reply_text += f'🔐 Lock / 🔓 Unlock: {"{:,.2f}".format(analysis_data["totalLockedPercent"])}% / {"{:,.2f}".format(analysis_data["totalUnlockedPercent"])} %\n\n'
 
