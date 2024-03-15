@@ -26,6 +26,7 @@ async def admin_notify(context: ContextTypes.DEFAULT_TYPE, admin_chat_id: int, u
 def log_function(chat_id, request_type, user_input, result):
     log_path = "log.txt"
     time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+    print(f'{time}--------{chat_id}--------{request_type}--------{user_input}--------{result}')
     with open(log_path, 'a+', encoding='utf-8') as f:
         f.write(f'{time}--------{chat_id}--------{request_type}--------{user_input}--------{result}\n')
         f.close()

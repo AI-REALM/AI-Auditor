@@ -519,6 +519,9 @@ async def general_chat_handle(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     chat_id = message.chat_id
     user = get_user_by_id(chat_id)
+    if not user:
+        user = create_user(chat_id)
+    
     if user.method == "wallet":
         sent_message = await message.reply_text(f'Searching info of `{text}`', parse_mode=ParseMode.MARKDOWN)
         await wallet_final_response(message=sent_message, context=context, user_input=text)
